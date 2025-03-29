@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Hover Frog</title>
+  <title>ESWY'ING SOON</title>
   <style>
     body {
       margin: 0;
@@ -16,11 +16,6 @@
       transition: background-color 0.3s ease;
     }
 
-    img:hover ~ body,
-    img:hover {
-      background-color: #00ff00;
-    }
-
     img {
       width: 200px;
       height: auto;
@@ -32,3 +27,29 @@
       margin-top: 20px;
       font-size: 2.5em;
       color: black;
+      z-index: 2;
+    }
+
+    /* background change class */
+    body.green-bg {
+      background-color: #00ff00;
+    }
+  </style>
+</head>
+<body>
+  <img src="pepe.gif" alt="Pepe GIF" id="frog">
+  <h1>ESWY'ING SOON</h1>
+
+  <script>
+    const frog = document.getElementById("frog");
+
+    frog.addEventListener("mouseenter", () => {
+      document.body.classList.add("green-bg");
+    });
+
+    frog.addEventListener("mouseleave", () => {
+      document.body.classList.remove("green-bg");
+    });
+  </script>
+</body>
+</html>
