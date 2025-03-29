@@ -9,33 +9,26 @@
       height: 100vh;
       background-color: white;
       display: flex;
+      flex-direction: column;
       justify-content: center;
       align-items: center;
+      font-family: Arial, sans-serif;
       transition: background-color 0.3s ease;
     }
 
-    .container:hover {
-      background-color: #00ff00; /* Bright green on hover */
-    }
-
-    .container {
-      height: 100vh;
-      width: 100vw;
-      display: flex;
-      justify-content: center;
-      align-items: center;
+    img:hover ~ body,
+    img:hover {
+      background-color: #00ff00;
     }
 
     img {
       width: 200px;
       height: auto;
       cursor: pointer;
+      z-index: 2;
     }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <img src="pepe.gif" alt="Pepe GIF">
-  </div>
-</body>
-</html>
+
+    h1 {
+      margin-top: 20px;
+      font-size: 2.5em;
+      color: black;
