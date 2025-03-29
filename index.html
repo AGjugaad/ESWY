@@ -2,31 +2,40 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>ESWY'ING SOON</title>
+  <title>Hover Frog</title>
   <style>
     body {
       margin: 0;
-      background-color: #ffffff;
+      height: 100vh;
+      background-color: white;
       display: flex;
-      flex-direction: column;
       justify-content: center;
       align-items: center;
+      transition: background-color 0.3s ease;
+    }
+
+    .container:hover {
+      background-color: #00ff00; /* Green */
+    }
+
+    .container {
       height: 100vh;
-      color: #000000;
-      font-family: Arial, sans-serif;
+      width: 100vw;
+      display: flex;
+      justify-content: center;
+      align-items: center;
     }
-    h1 {
-      font-size: 2.5em;
-      margin-top: 20px;
-    }
+
     img {
       width: 200px;
       height: auto;
+      cursor: pointer;
     }
   </style>
 </head>
 <body>
-  <img src="pepe.gif" alt="Running Pepe GIF">
-  <h1>ESWY'ING SOON</h1>
+  <div class="container">
+    <img src="pepe.gif" alt="Pepe GIF">
+  </div>
 </body>
 </html>
