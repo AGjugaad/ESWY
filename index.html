@@ -1,55 +1,389 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>ESWY'ING SOON</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ESWY</title>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
   <style>
-    body {
+    html, body {
+  cursor: url('cursor1.png'), auto;
       margin: 0;
-      height: 100vh;
-      background-color: white;
+      padding: 0;
+      height: 100%;
+      /* Enhanced sky gradient with multiple color stops */
+      background: linear-gradient(to bottom, #1a237e, #3949ab, #42a5f5, #81d4fa);
+      font-family: 'Press Start 2P', system-ui, sans-serif;
       display: flex;
-      flex-direction: column;
       justify-content: center;
       align-items: center;
-      font-family: Arial, sans-serif;
-      transition: background-color 0.3s ease;
+      overflow: hidden;
     }
 
-    img {
-      width: 200px;
+    canvas {
+      display: block;
+      max-width: 100%;
       height: auto;
-      cursor: pointer;
-      z-index: 2;
+      background: transparent;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     }
 
-    h1 {
-      margin-top: 20px;
-      font-size: 2.5em;
-      color: black;
-      z-index: 2;
+    #score {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      font-size: 14px;
+      color: #FFF;
+      background: rgba(0, 0, 0, 0.5);
+      padding: 10px 15px;
+      border-radius: 8px;
+      z-index: 1;
+      font-family: 'Press Start 2P', monospace;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
     }
 
-    /* background change class */
-    body.green-bg {
-      background-color: #00ff00;
+    #gameOverMessage {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 26px;
+      color: #FFFFFF;
+      font-family: 'Press Start 2P', monospace;
+      display: none;
+      text-align: center;
+      z-index: 2;
+      text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.8);
+    }
+
+    .ground {
+      fill: #32CD32; /* Vibrant green */
+    }
+
+    .cloud {
+      fill: #FFFFFF; /* White */
     }
   </style>
 </head>
 <body>
-  <img src="pepe.gif" alt="Pepe GIF" id="frog">
-  <h1>ESWY'ING SOON</h1>
-
+  <div id="score">Score: 0</div>
+  <div id="gameOverMessage">khel khatam</div>
+  <canvas id="gameCanvas"></canvas>
   <script>
-    const frog = document.getElementById("frog");
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
 
-    frog.addEventListener("mouseenter", () => {
-      document.body.classList.add("green-bg");
+    // Responsive sizing
+    let canvasWidth = Math.min(window.innerWidth * 0.95, 800);
+    let canvasHeight = Math.min(window.innerHeight * 0.6, 300);
+    canvas.width = canvasWidth;
+    canvas.height = canvasHeight;
+
+    const scoreElement = document.getElementById("score");
+    const gameOverMessage = document.getElementById("gameOverMessage");
+
+    const frogSprite1 = new Image();
+    frogSprite1.src = "frogbaba1.png";
+    const frogSprite2 = new Image();
+    frogSprite2.src = "frogbaba2.png";
+    const frogJumpSprite = new Image();
+    frogJumpSprite.src = "frogbaba3.png";
+
+    const tallLotus = new Image();
+    tallLotus.src = "lotus1.png";
+    const shortLotus = new Image();
+    shortLotus.src = "lotus2.png";
+
+    // Sky elements
+    const sun = {
+      x: canvasWidth - 70,
+      y: 60,
+      radius: 30,
+      glow: 40
+    };
+    
+    const stars = [];
+    for (let i = 0; i < 20; i++) {
+      stars.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * (canvas.height / 2),
+        size: Math.random() * 2 + 1,
+        twinkle: Math.random() * 0.5 + 0.5
+      });
+    }
+
+    const dino = {
+      x: 50,
+      y: canvas.height - 60,
+      width: 50,
+      height: 50,
+      jumping: false,
+      velocity: 0,
+      gravity: 0.6,
+      jumpForce: -12,
+      currentSprite: frogSprite1,
+      jumpCount: 0,
+      maxJumps: 2,
+    };
+
+    let obstacles = [];
+    let clouds = [];
+    let score = 0;
+    let frameCount = 0;
+    let gameOver = false;
+    let gameSpeed = 4;
+    const groundY = canvas.height - 10;
+    
+    // More varied and naturalistic clouds
+    for (let i = 0; i < 8; i++) {
+      clouds.push({
+        x: Math.random() * canvas.width,
+        y: 20 + Math.random() * 40,
+        width: 60 + Math.random() * 40,
+        height: 20 + Math.random() * 15,
+        speed: 0.2 + Math.random() * 0.3,
+        segments: 3 + Math.floor(Math.random() * 3),
+        opacity: 0.7 + Math.random() * 0.3
+      });
+    }
+
+    // Grass tufts for enhanced ground detail
+    const grassTufts = [];
+    for (let i = 0; i < canvasWidth; i += 10) {
+      grassTufts.push({
+        x: i,
+        height: 3 + Math.random() * 7,
+        width: 1 + Math.random() * 2
+      });
+    }
+
+    function update() {
+      if (gameOver) return;
+
+      if (dino.jumping) {
+        dino.velocity += dino.gravity;
+        dino.y += dino.velocity;
+
+        if (dino.y >= canvas.height - 60) {
+          dino.y = canvas.height - 60;
+          dino.jumping = false;
+          dino.velocity = 0;
+          dino.jumpCount = 0;
+        }
+      }
+
+      // Add obstacles
+      if (Math.random() < 0.02) {
+        const isTall = Math.random() > 0.5;
+        obstacles.push({
+          x: canvas.width,
+          y: canvas.height - (isTall ? 70 : 40),
+          width: isTall ? 50 : 40,
+          height: isTall ? 60 : 30,
+          isTall: isTall,
+        });
+      }
+
+      obstacles.forEach(ob => ob.x -= gameSpeed);
+      obstacles = obstacles.filter(ob => ob.x + ob.width > 0);
+
+      clouds.forEach(cloud => {
+        cloud.x -= cloud.speed;
+        if (cloud.x + cloud.width < 0) {
+          cloud.x = canvas.width;
+          cloud.y = 20 + Math.random() * 40;
+          cloud.opacity = 0.7 + Math.random() * 0.3;
+        }
+      });
+
+      // Twinkle stars
+      stars.forEach(star => {
+        star.twinkle = Math.max(0.5, Math.min(1, star.twinkle + (Math.random() - 0.5) * 0.1));
+      });
+
+      // Collision detection
+      for (let ob of obstacles) {
+        if (
+          dino.x < ob.x + ob.width &&
+          dino.x + dino.width > ob.x &&
+          dino.y < ob.y + ob.height &&
+          dino.y + dino.height > ob.y
+        ) {
+          gameOver = true;
+          gameOverMessage.style.display = "block";
+        }
+      }
+
+      score++;
+      scoreElement.textContent = `Score: ${Math.floor(score / 10)}`;
+      gameSpeed += 0.001;
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Draw sky gradient directly on canvas
+      const skyGradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+      skyGradient.addColorStop(0, '#1a237e');    // Deep blue at top
+      skyGradient.addColorStop(0.3, '#3949ab');  // Medium blue
+      skyGradient.addColorStop(0.6, '#42a5f5');  // Light blue
+      skyGradient.addColorStop(1, '#81d4fa');    // Very light blue at horizon
+      
+      ctx.fillStyle = skyGradient;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      
+      // Draw stars (subtle)
+      ctx.fillStyle = '#FFFFFF';
+      stars.forEach(star => {
+        ctx.globalAlpha = star.twinkle;
+        ctx.beginPath();
+        ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
+        ctx.fill();
+      });
+      ctx.globalAlpha = 1;
+      
+      // Draw sun with gradient and glow
+      const sunGradient = ctx.createRadialGradient(
+        sun.x, sun.y, 0,
+        sun.x, sun.y, sun.radius
+      );
+      sunGradient.addColorStop(0, '#FFFF99');
+      sunGradient.addColorStop(0.8, '#FFCC33');
+      sunGradient.addColorStop(1, '#FF9900');
+      
+      ctx.fillStyle = sunGradient;
+      ctx.beginPath();
+      ctx.arc(sun.x, sun.y, sun.radius, 0, Math.PI * 2);
+      ctx.fill();
+      
+      // Sun glow
+      ctx.save();
+      ctx.globalAlpha = 0.2;
+      const glowGradient = ctx.createRadialGradient(
+        sun.x, sun.y, sun.radius,
+        sun.x, sun.y, sun.radius + sun.glow
+      );
+      glowGradient.addColorStop(0, '#FFCC33');
+      glowGradient.addColorStop(1, 'rgba(255, 204, 51, 0)');
+      
+      ctx.fillStyle = glowGradient;
+      ctx.beginPath();
+      ctx.arc(sun.x, sun.y, sun.radius + sun.glow, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+
+      // Draw enhanced clouds
+      clouds.forEach(cloud => {
+        ctx.save();
+        ctx.globalAlpha = cloud.opacity;
+        
+        // Multiple connected circles for more natural cloud shapes
+        ctx.fillStyle = '#FFFFFF';
+        ctx.beginPath();
+        
+        const centerX = cloud.x + cloud.width / 2;
+        const baseY = cloud.y;
+        
+        // Main cloud body
+        ctx.arc(centerX, baseY, cloud.width / 3, 0, Math.PI * 2);
+        
+        // Add bumps around the cloud
+        for (let i = 0; i < cloud.segments; i++) {
+          const angle = (i / cloud.segments) * Math.PI * 2;
+          const offsetX = Math.cos(angle) * (cloud.width / 2.5);
+          const offsetY = Math.sin(angle) * (cloud.height / 2.5);
+          const size = (0.5 + Math.sin(i) * 0.5) * cloud.width / 4;
+          
+          ctx.arc(centerX + offsetX, baseY + offsetY, size, 0, Math.PI * 2);
+        }
+        
+        ctx.fill();
+        ctx.restore();
+      });
+
+      // Enhanced ground with multiple layers
+      // Base ground
+      const groundGradient = ctx.createLinearGradient(0, groundY - 20, 0, canvas.height);
+      groundGradient.addColorStop(0, '#4CAF50');  // Light green at top
+      groundGradient.addColorStop(0.5, '#388E3C'); // Medium green
+      groundGradient.addColorStop(1, '#2E7D32');   // Dark green at bottom
+      
+      ctx.fillStyle = groundGradient;
+      ctx.fillRect(0, groundY - 5, canvas.width, canvas.height - groundY + 5);
+      
+      // Add texture pattern to ground
+      ctx.fillStyle = 'rgba(48, 100, 48, 0.5)';
+      for(let i = 0; i < canvas.width; i += 15) {
+        for(let j = groundY; j < canvas.height; j += 10) {
+          if (Math.random() > 0.7) {
+            ctx.fillRect(i + Math.random() * 5, j + Math.random() * 5, 2, 2);
+          }
+        }
+      }
+      
+      // Draw detailed grass tufts
+      ctx.fillStyle = '#4CAF50';
+      grassTufts.forEach(tuft => {
+        // Grass blades
+        ctx.beginPath();
+        ctx.moveTo(tuft.x, groundY - 5);
+        ctx.lineTo(tuft.x - tuft.width, groundY - 5 - tuft.height);
+        ctx.lineTo(tuft.x + tuft.width, groundY - 5);
+        ctx.fill();
+        
+        ctx.beginPath();
+        ctx.moveTo(tuft.x, groundY - 5); 
+        ctx.lineTo(tuft.x + tuft.width, groundY - 5 - tuft.height);
+        ctx.lineTo(tuft.x + tuft.width * 2, groundY - 5);
+        ctx.fill();
+      });
+
+      // Draw the player frog
+      if (dino.jumping) {
+        ctx.drawImage(frogJumpSprite, dino.x, dino.y, dino.width, dino.height);
+      } else {
+        frameCount++;
+        if (frameCount > 15) {
+          frameCount = 0;
+          dino.currentSprite = dino.currentSprite === frogSprite1 ? frogSprite2 : frogSprite1;
+        }
+        ctx.drawImage(dino.currentSprite, dino.x, dino.y, dino.width, dino.height);
+      }
+
+      // Draw obstacles (lotus)
+      obstacles.forEach(ob => {
+        const sprite = ob.isTall ? tallLotus : shortLotus;
+        ctx.drawImage(sprite, ob.x, ob.y, ob.width, ob.height);
+      });
+    }
+
+    function loop() {
+      update();
+      draw();
+      requestAnimationFrame(loop);
+    }
+
+    // Keyboard & touch controls
+    function jump() {
+      if (gameOver) {
+        location.reload();
+      } else if (dino.jumpCount < dino.maxJumps) {
+        dino.velocity = dino.jumpForce;
+        dino.jumping = true;
+        dino.jumpCount++;
+      }
+    }
+
+    window.addEventListener("keydown", (e) => {
+      if (e.code === "Space") jump();
     });
 
-    frog.addEventListener("mouseleave", () => {
-      document.body.classList.remove("green-bg");
+    window.addEventListener("touchstart", () => {
+      jump();
     });
+
+    loop();
   </script>
 </body>
 </html>
