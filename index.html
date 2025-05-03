@@ -7,7 +7,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
   <style>
     html, body {
-  cursor: url('cursor1.png'), auto;
+      cursor: url('cursor1.png'), auto;
       margin: 0;
       padding: 0;
       height: 100%;
@@ -132,8 +132,13 @@
     let score = 0;
     let frameCount = 0;
     let gameOver = false;
-    let gameSpeed = 3;
+    let gameSpeed = 2.5; // Reduced initial game speed
     const groundY = canvas.height - 10;
+    
+    // Obstacle generation variables
+    let lastObstacleTime = Date.now();
+    const minObstacleGap = 1500; 
+    const obstacleChance = 0.01; 
     
     // More varied and naturalistic clouds
     for (let i = 0; i < 8; i++) {
@@ -173,23 +178,20 @@
         }
       }
 
-      // Add obstacles
-      let lastObstacleTime = 0;
-const minGap = 3000; // Minimum gap in milliseconds
+      // Add obstacles with proper minimum gap and lower spawn rate
+      const now = Date.now();
+      if (now - lastObstacleTime > minObstacleGap && Math.random() < obstacleChance) {
+        lastObstacleTime = now;
 
-if (Date.now() - lastObstacleTime > minGap && Math.random() < 0.01) {
-  lastObstacleTime = Date.now(); // Update the last spawn time
-
-  const isTall = Math.random() > 0.7;
-  obstacles.push({
-    x: canvas.width,
-    y: canvas.height - (isTall ? 70 : 40),
-    width: isTall ? 50 : 40,
-    height: isTall ? 60 : 30,
-    isTall: isTall,
-  });
-}
-
+        const isTall = Math.random() > 0.7;
+        obstacles.push({
+          x: canvas.width,
+          y: canvas.height - (isTall ? 70 : 40),
+          width: isTall ? 50 : 40,
+          height: isTall ? 60 : 30,
+          isTall: isTall,
+        });
+      }
 
       obstacles.forEach(ob => ob.x -= gameSpeed);
       obstacles = obstacles.filter(ob => ob.x + ob.width > 0);
@@ -208,13 +210,26 @@ if (Date.now() - lastObstacleTime > minGap && Math.random() < 0.01) {
         star.twinkle = Math.max(0.5, Math.min(1, star.twinkle + (Math.random() - 0.5) * 0.1));
       });
 
-      // Collision detection
+      // Collision detection with reduced hitbox for more forgiving gameplay
       for (let ob of obstacles) {
+        // Reduced hitbox size (80% of visual size)
+        const hitboxReduction = 0.2;
+        const dinoHitboxWidth = dino.width * (1 - hitboxReduction);
+        const dinoHitboxHeight = dino.height * (1 - hitboxReduction);
+        const obHitboxWidth = ob.width * (1 - hitboxReduction);
+        const obHitboxHeight = ob.height * (1 - hitboxReduction);
+        
+        // Adjusted hitbox positions
+        const dinoHitboxX = dino.x + (dino.width - dinoHitboxWidth) / 2;
+        const dinoHitboxY = dino.y + (dino.height - dinoHitboxHeight) / 2;
+        const obHitboxX = ob.x + (ob.width - obHitboxWidth) / 2;
+        const obHitboxY = ob.y + (ob.height - obHitboxHeight) / 2;
+        
         if (
-          dino.x < ob.x + ob.width &&
-          dino.x + dino.width > ob.x &&
-          dino.y < ob.y + ob.height &&
-          dino.y + dino.height > ob.y
+          dinoHitboxX < obHitboxX + obHitboxWidth &&
+          dinoHitboxX + dinoHitboxWidth > obHitboxX &&
+          dinoHitboxY < obHitboxY + obHitboxHeight &&
+          dinoHitboxY + dinoHitboxHeight > obHitboxY
         ) {
           gameOver = true;
           gameOverMessage.style.display = "block";
@@ -223,7 +238,9 @@ if (Date.now() - lastObstacleTime > minGap && Math.random() < 0.01) {
 
       score++;
       scoreElement.textContent = `Score: ${Math.floor(score / 10)}`;
-      gameSpeed += 0.001;
+      
+      // Slower game speed increase rate
+      gameSpeed += 0.0005;
     }
 
     function draw() {
@@ -362,6 +379,30 @@ if (Date.now() - lastObstacleTime > minGap && Math.random() < 0.01) {
         const sprite = ob.isTall ? tallLotus : shortLotus;
         ctx.drawImage(sprite, ob.x, ob.y, ob.width, ob.height);
       });
+      
+      // Debug: Visualize hitboxes (uncomment for debugging)
+      /*
+      ctx.strokeStyle = 'red';
+      ctx.lineWidth = 2;
+      
+      // Dino hitbox
+      const dinoHitboxReduction = 0.2;
+      const dinoHitboxWidth = dino.width * (1 - dinoHitboxReduction);
+      const dinoHitboxHeight = dino.height * (1 - dinoHitboxReduction);
+      const dinoHitboxX = dino.x + (dino.width - dinoHitboxWidth) / 2;
+      const dinoHitboxY = dino.y + (dino.height - dinoHitboxHeight) / 2;
+      ctx.strokeRect(dinoHitboxX, dinoHitboxY, dinoHitboxWidth, dinoHitboxHeight);
+      
+      // Obstacle hitboxes
+      obstacles.forEach(ob => {
+        const obHitboxReduction = 0.2;
+        const obHitboxWidth = ob.width * (1 - obHitboxReduction);
+        const obHitboxHeight = ob.height * (1 - obHitboxReduction);
+        const obHitboxX = ob.x + (ob.width - obHitboxWidth) / 2;
+        const obHitboxY = ob.y + (ob.height - obHitboxHeight) / 2;
+        ctx.strokeRect(obHitboxX, obHitboxY, obHitboxWidth, obHitboxHeight);
+      });
+      */
     }
 
     function loop() {
