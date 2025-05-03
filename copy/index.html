@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ESWY</title>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      background-color: #ffffff;
+      font-family: 'Press Start 2P', system-ui, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+    }
+
+    canvas {
+      display: block;
+      max-width: 100%;
+      height: auto;
+      background-color: #ffffff;
+    }
+
+    #score {
+      position: fixed;
+      top: 10px;
+      left: 10px;
+      font-size: 12px;
+      color: #333;
+      background: rgba(255, 255, 255, 0.85);
+      padding: 6px 10px;
+      border-radius: 4px;
+      z-index: 1;
+      font-family: 'Press Start 2P', monospace;
+    }
+
+    #gameOverMessage {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 18px;
+      color: #000000;
+      font-family: 'Press Start 2P', monospace;
+      display: none;
+      text-align: center;
+      white-space: pre-line;
+      z-index: 2;
+    }
+  </style>
+</head>
+<body>
+  <div id="score">Score: 0</div>
+  <div id="gameOverMessage">khel khatham</div>
+  <canvas id="gameCanvas"></canvas>
+  <script>
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+
+    // Responsive sizing
+    let canvasWidth = Math.min(window.innerWidth * 0.95, 800);
+    let canvasHeight = Math.min(window.innerHeight * 0.6, 300);
+    canvas.width = canvasWidth;
+    canvas.height = canvasHeight;
+
+    const scoreElement = document.getElementById("score");
+    const gameOverMessage = document.getElementById("gameOverMessage");
+
+    const frogSprite1 = new Image();
+    frogSprite1.src = "frogbaba1.png";
+    const frogSprite2 = new Image();
+    frogSprite2.src = "frogbaba2.png";
+    const frogJumpSprite = new Image();
+    frogJumpSprite.src = "frogbaba3.png";
+
+    const tallLotus = new Image();
+    tallLotus.src = "lotus1.png";
+    const shortLotus = new Image();
+    shortLotus.src = "lotus2.png";
+
+    const dino = {
+      x: 50,
+      y: canvas.height - 60,
+      width: 50,
+      height: 50,
+      jumping: false,
+      velocity: 0,
+      gravity: 0.6,
+      jumpForce: -12,
+      currentSprite: frogSprite1,
+      jumpCount: 0,
+      maxJumps: 2,
+    };
+
+    let obstacles = [];
+    let clouds = [];
+    let score = 0;
+    let frameCount = 0;
+    let gameOver = false;
+    let gameSpeed = 4;
+    const groundY = canvas.height - 10;
+
+    for (let i = 0; i < 5; i++) {
+      clouds.push({
+        x: Math.random() * canvas.width,
+        y: 20 + Math.random() * 30,
+        width: 60 + Math.random() * 40,
+        speed: 0.2 + Math.random() * 0.3,
+      });
+    }
+
+    function update() {
+      if (gameOver) return;
+
+      if (dino.jumping) {
+        dino.velocity += dino.gravity;
+        dino.y += dino.velocity;
+
+        if (dino.y >= canvas.height - 60) {
+          dino.y = canvas.height - 60;
+          dino.jumping = false;
+          dino.velocity = 0;
+          dino.jumpCount = 0;
+        }
+      }
+
+      // Add obstacles
+      if (Math.random() < 0.02) {
+        const isTall = Math.random() > 0.5;
+        obstacles.push({
+          x: canvas.width,
+          y: canvas.height - (isTall ? 70 : 40),
+          width: isTall ? 50 : 40,
+          height: isTall ? 60 : 30,
+          isTall: isTall,
+        });
+      }
+
+      obstacles.forEach(ob => ob.x -= gameSpeed);
+      obstacles = obstacles.filter(ob => ob.x + ob.width > 0);
+
+      clouds.forEach(cloud => {
+        cloud.x -= cloud.speed;
+        if (cloud.x + cloud.width < 0) {
+          cloud.x = canvas.width;
+          cloud.y = 20 + Math.random() * 30;
+        }
+      });
+
+      // Collision detection
+      for (let ob of obstacles) {
+        if (
+          dino.x < ob.x + ob.width &&
+          dino.x + dino.width > ob.x &&
+          dino.y < ob.y + ob.height &&
+          dino.y + dino.height > ob.y
+        ) {
+          gameOver = true;
+          gameOverMessage.style.display = "block";
+        }
+      }
+
+      score++;
+      scoreElement.textContent = `Score: ${Math.floor(score / 10)}`;
+      gameSpeed += 0.001;
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      ctx.fillStyle = "#cccccc";
+      clouds.forEach(cloud => {
+        ctx.beginPath();
+        ctx.arc(cloud.x, cloud.y, cloud.width / 3, 0, Math.PI * 2);
+        ctx.arc(cloud.x + cloud.width / 4, cloud.y - cloud.width / 6, cloud.width / 4, 0, Math.PI * 2);
+        ctx.arc(cloud.x + cloud.width / 2, cloud.y, cloud.width / 3, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      ctx.strokeStyle = "#999999";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(0, groundY);
+      ctx.lineTo(canvas.width, groundY);
+      ctx.stroke();
+
+      if (dino.jumping) {
+        ctx.drawImage(frogJumpSprite, dino.x, dino.y, dino.width, dino.height);
+      } else {
+        frameCount++;
+        if (frameCount > 15) {
+          frameCount = 0;
+          dino.currentSprite = dino.currentSprite === frogSprite1 ? frogSprite2 : frogSprite1;
+        }
+        ctx.drawImage(dino.currentSprite, dino.x, dino.y, dino.width, dino.height);
+      }
+
+      obstacles.forEach(ob => {
+        const sprite = ob.isTall ? tallLotus : shortLotus;
+        ctx.drawImage(sprite, ob.x, ob.y, ob.width, ob.height);
+      });
+    }
+
+    function loop() {
+      update();
+      draw();
+      requestAnimationFrame(loop);
+    }
+
+    // Keyboard & touch controls
+    function jump() {
+      if (gameOver) {
+        location.reload();
+      } else if (dino.jumpCount < dino.maxJumps) {
+        dino.velocity = dino.jumpForce;
+        dino.jumping = true;
+        dino.jumpCount++;
+      }
+    }
+
+    window.addEventListener("keydown", (e) => {
+      if (e.code === "Space") jump();
+    });
+
+    window.addEventListener("touchstart", () => {
+      jump();
+    });
+
+    loop();
+  </script>
+</body>
+</html>
