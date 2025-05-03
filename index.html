@@ -132,7 +132,7 @@
     let score = 0;
     let frameCount = 0;
     let gameOver = false;
-    let gameSpeed = 4;
+    let gameSpeed = 3;
     const groundY = canvas.height - 10;
     
     // More varied and naturalistic clouds
@@ -174,16 +174,22 @@
       }
 
       // Add obstacles
-      if (Math.random() < 0.02) {
-        const isTall = Math.random() > 0.5;
-        obstacles.push({
-          x: canvas.width,
-          y: canvas.height - (isTall ? 70 : 40),
-          width: isTall ? 50 : 40,
-          height: isTall ? 60 : 30,
-          isTall: isTall,
-        });
-      }
+      let lastObstacleTime = 0;
+const minGap = 3000; // Minimum gap in milliseconds
+
+if (Date.now() - lastObstacleTime > minGap && Math.random() < 0.01) {
+  lastObstacleTime = Date.now(); // Update the last spawn time
+
+  const isTall = Math.random() > 0.7;
+  obstacles.push({
+    x: canvas.width,
+    y: canvas.height - (isTall ? 70 : 40),
+    width: isTall ? 50 : 40,
+    height: isTall ? 60 : 30,
+    isTall: isTall,
+  });
+}
+
 
       obstacles.forEach(ob => ob.x -= gameSpeed);
       obstacles = obstacles.filter(ob => ob.x + ob.width > 0);
