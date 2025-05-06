@@ -48,8 +48,8 @@
     
     /* Add a container for the game canvas that will receive theme changes */
     #gameContainer {
-      width: 800px;
-      height: 300px;
+      width: min(800px, 95vw);
+      height: min(300px, 50vh);
       background: transparent;
       border-radius: 8px;
       transition: filter 1s ease;
@@ -58,6 +58,7 @@
       pointer-events: auto;
       visibility: visible !important;
       opacity: 1 !important;
+      margin: 0 auto;
     }
     
     /* Loading animation styles */
@@ -493,16 +494,16 @@
     },
       {
         name: "Janam 2",
-        skyColors: ['#fff5e6', '#ffecd9', '#ffe4cc', '#ffdbba'],
-        sunColors: ['#ffcc80', '#ffb74d', '#ffa726'],
-        sunGlowColor: 'rgba(255, 167, 38, 0.4)',
-        starColor: '#d4a257',
-        cloudColor: '#fff9f2',
-        groundColors: ['#e6c9a3', '#d4b38c', '#c19b76'],
-        grassColor: '#d4b892',
-        textColor: '#5c4023',
-        fontFamily: "'Press Start 2P', 'Source Code Pro', monospace",
-        filter: 'sepia(0.35) brightness(1.15) saturate(1.1) contrast(1.05)',
+        skyColors: ['#f4e9d9', '#efe4d4', '#e9dfcf', '#e4daca'],
+        sunColors: ['#d4a257', '#c49350', '#b48449'],
+        sunGlowColor: 'rgba(212, 162, 87, 0.3)',
+        starColor: '#b48449',
+        cloudColor: '#f9f2e7',
+        groundColors: ['#d4b892', '#c4a882', '#b49872'],
+        grassColor: '#b48449',
+        textColor: '#4a3c2d',
+        fontFamily: "'Press Start 2P', monospace",
+        filter: 'sepia(0.4) brightness(1.05) contrast(1.1)',
         backgrounds: ['background1.png']
       },
       {
