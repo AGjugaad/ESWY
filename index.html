@@ -4,7 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>ESWY</title>
-  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Courier+New&family=Times+New+Roman&family=Arial&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <div id="termsModal" class="modal">
     <div class="modal-content">
       <p>The audio ahead contains a jumble of highly potent cosmic frequencies. Listening to it may cause:</p>
@@ -309,8 +311,19 @@
     // Ensure modal is displayed only once per session
     modal.style.display = 'flex';
     
-    // Initialize audio element
-    const backgroundMusic = new Audio('SpotiMate.io - ESWY - Aman Sagar.mp3');
+    // Initialize audio element with proper handling
+    let backgroundMusic = new Audio('SpotiMate.io - ESWY - Aman Sagar.mp3');
+    
+    // Reset and reload audio when page becomes visible
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') {
+        backgroundMusic.pause();
+        backgroundMusic = new Audio('SpotiMate.io - ESWY - Aman Sagar.mp3');
+        if (modal.style.display === 'none') {
+          backgroundMusic.play().catch(error => console.log('Audio playback failed:', error));
+        }
+      }
+    });
     
     function initializeLoadingAnimation() {
       const loadingContainer = document.getElementById('initial-loader');
@@ -680,7 +693,7 @@
 
 
       // Check if we need to change theme (every 300 points)
-      const themeScore = Math.floor(displayScore / 30);
+      const themeScore = Math.floor(displayScore / 300);
       const newThemeIndex = themeScore % themes.length;
       
       if (newThemeIndex !== currentThemeIndex) {
