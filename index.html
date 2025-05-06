@@ -4,20 +4,168 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>ESWY</title>
-  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Courier+New&family=Times+New+Roman&family=Arial&display=swap" rel="stylesheet">
+  <div id="termsModal" class="modal">
+    <div class="modal-content">
+      <p>The audio ahead contains a jumble of highly potent cosmic frequencies. Listening to it may cause:</p>
+
+      <div style="margin-left: 1em; line-height: 1.6;">
+        <div>— Unregulated flashbacks of past lives</div>
+        <div>— An unshakable thought that you don’t belong here</div>
+        <div>— Fear of dying in bizarre ways</div>
+        <div>— A deep yearning that cannot be fixed</div>
+        <div>— A clear view of the Truth</div>
+        <div>— A fixing of the soul</div>
+      </div>
+      
+      <p>If you think you can handle said side effects, <strong>ESWY</strong>, the song awaits you.<br>
+      <small>(issued by ESWY Pvt. Ltd.)</small></p>
+      
+        <button id="yeswyButton">yeswy</button>
+    </div>
+</div>
   <style>
     html, body {
       cursor: url('cursor1.png'), auto;
       margin: 0;
       padding: 0;
       height: 100%;
-      /* Enhanced sky gradient with multiple color stops */
-      background: linear-gradient(to bottom, #1a237e, #3949ab, #42a5f5, #81d4fa);
+      background-image: url('background1.png');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
       font-family: 'Press Start 2P', system-ui, sans-serif;
       display: flex;
       justify-content: center;
       align-items: center;
       overflow: hidden;
+      transition: background-image 1s ease;
+    }
+    
+    /* Add a container for the game canvas that will receive theme changes */
+    #gameContainer {
+      width: 800px;
+      height: 300px;
+      background: transparent;
+      border-radius: 8px;
+      transition: filter 1s ease;
+    }
+    
+    /* Loading animation styles */
+    #initial-loader {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      z-index: 1000;
+      /* Ensure loader is not affected by theme changes */
+      filter: none;
+    }
+    
+    .top-row, .bottom-row { 
+      position: absolute; 
+      left: 50%; /* Center horizontally */ 
+      transform: translateX(-50%); /* Adjust because left: 50% puts the left edge at center */ 
+      display: flex; 
+      justify-content: center; 
+      align-items: center;
+      filter: none; 
+    } 
+    
+    /* Specifically place them pixel-wise */ 
+    .top-row { 
+      top: 48%; /* slightly above the center */ 
+    } 
+    
+    .bottom-row { 
+      top: 52%; /* slightly below the center */ 
+    }
+    
+    .diamond { 
+      width: 25px; 
+      height: 25px; 
+      background: rgb(255, 247, 140); 
+      transform: rotate(45deg); 
+      margin: 10px; 
+      filter: none;
+      /* Remove transition for diamonds to keep color constant */ 
+    } 
+    
+    /* Use consistent color for all diamonds */
+    .diamond.active { 
+      background-color: #ffd700; 
+      box-shadow: 0 0 15px rgba(255, 215, 0, 0.8); 
+    }
+
+    .modal {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(8px);
+      z-index: 1001;
+      opacity: 1;
+      transition: opacity 0.3s ease;
+    }
+    .modal-content {
+      background: linear-gradient(145deg, #2a2a2a, #1a1a1a);
+      padding: 30px;
+      border-radius: 15px;
+      text-align: center;
+      color: #fff;
+      font-family: 'Press Start 2P', cursive;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.5),
+                 inset 0 0 15px rgba(255, 255, 255, 0.1);
+      max-width: 600px;
+      width: 90%;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      animation: modalAppear 0.5s ease-out;
+    }
+    @keyframes modalAppear {
+      from {
+        transform: scale(0.8);
+        opacity: 0;
+      }
+      to {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+    .modal-content p {
+      line-height: 1.8;
+      margin: 0 0 20px 0;
+      color: #fff;
+      text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+    }
+    #yeswyButton {
+      margin-top: 25px;
+      padding: 15px 30px;
+      font-size: 18px;
+      cursor: pointer;
+      background: linear-gradient(45deg, #ff6b6b, #ff8e8e);
+      border: none;
+      border-radius: 8px;
+      color: white;
+      font-family: 'Press Start 2P', cursive;
+      text-transform: uppercase;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
+    }
+    #yeswyButton:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(255, 107, 107, 0.6);
+      background: linear-gradient(45deg, #ff8e8e, #ff6b6b);
+    }
+    #yeswyButton:active {
+      transform: translateY(1px);
+      box-shadow: 0 2px 10px rgba(255, 107, 107, 0.4);
     }
 
     canvas {
@@ -38,9 +186,30 @@
       background: rgba(0, 0, 0, 0.5);
       padding: 10px 15px;
       border-radius: 8px;
-      z-index: 1;
+      z-index: 100;
       font-family: 'Press Start 2P', monospace;
       text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+      /* Ensure score is not affected by theme changes */
+      filter: none;
+    }
+    
+    #themeAnnouncement {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 24px;
+      color: #FFFFFF;
+      background: rgba(0, 0, 0, 0.7);
+      padding: 15px 25px;
+      border-radius: 10px;
+      font-family: 'Press Start 2P', monospace;
+      display: none;
+      text-align: center;
+      z-index: 3;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+      opacity: 0;
+      transition: opacity 0.5s ease;
     }
 
     #gameOverMessage {
@@ -55,6 +224,36 @@
       text-align: center;
       z-index: 2;
       text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.8);
+      transition: color 1s ease, font-family 1s ease, text-shadow 1s ease;
+      background: rgba(0, 0, 0, 0.8);
+      padding: 20px;
+      border-radius: 10px;
+    }
+
+    .game-over-btn {
+      margin: 20px 10px;
+      padding: 10px 20px;
+      font-size: 16px;
+      font-family: 'Press Start 2P', monospace;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    #restartBtn {
+      background: linear-gradient(45deg, #4CAF50, #45a049);
+      color: white;
+    }
+
+    #spotifyBtn {
+      background: linear-gradient(45deg, #1DB954, #1aa34a);
+      color: white;
+    }
+
+    .game-over-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     }
 
     .ground {
@@ -67,12 +266,132 @@
   </style>
 </head>
 <body>
+  <!-- Loading animation container -->
+  <div id="initial-loader">
+    <div class="top-row">
+      <div id="diamond1" class="diamond"></div>
+      <div id="diamond2" class="diamond"></div>
+      <div id="diamond3" class="diamond"></div>
+      <div id="diamond4" class="diamond"></div>
+    </div>
+    <div class="bottom-row">
+      <div id="diamond5" class="diamond"></div>
+      <div id="diamond6" class="diamond"></div>
+      <div id="diamond7" class="diamond"></div>
+    </div>
+  </div>
+  
+  <div id="gameContainer">
+    <canvas id="gameCanvas"></canvas>
+  </div>
   <div id="score">Score: 0</div>
-  <div id="gameOverMessage">khel khatam</div>
-  <canvas id="gameCanvas"></canvas>
+  <div id="gameOverMessage">
+    khel khatam
+    <br><br>
+    <button id="restartBtn" class="game-over-btn">restart</button>
+    <button id="spotifyBtn" class="game-over-btn">go to spotify!!</button>
+  </div>
+  <div id="themeAnnouncement"></div>
+  
+  <!-- Include loading animation script -->
   <script>
+    // Modal and loading animation logic
+    const modal = document.getElementById('termsModal');
+    const yeswyButton = document.getElementById('yeswyButton');
+    const hasAcceptedTerms = localStorage.getItem('eswyTermsAccepted');
+
+    // Hide modal if terms were previously accepted
+    if (hasAcceptedTerms) {
+      modal.style.display = 'none';
+    }
+
+    function initializeLoadingAnimation() {
+      const loadingContainer = document.getElementById('initial-loader');
+      const diamonds = loadingContainer.querySelectorAll('.diamond');
+
+      let currentIndex = 0;
+      let animationInterval;
+      let cycles = 0;
+      const maxCycles = 1;
+
+      loadingContainer.style.filter = 'none';
+
+      function activateDiamond() {
+        diamonds.forEach(diamond => diamond.classList.remove('active'));
+        
+        if (currentIndex >= diamonds.length) {
+          currentIndex = 0;
+          cycles++;
+
+          if (cycles >= maxCycles) {
+            clearInterval(animationInterval);
+            setTimeout(() => {
+              loadingContainer.style.display = 'none';
+            }, 300);
+            return;
+          }
+        }
+        
+        diamonds[currentIndex].classList.add('active');
+        currentIndex++;
+      }
+
+      return {
+        start: () => {
+          loadingContainer.style.display = 'grid';
+          animationInterval = setInterval(activateDiamond, 300);
+        }
+      };
+    }
+
+    // Initialize game only after accepting terms
+    // Create audio element
+    const backgroundMusic = new Audio('SpotiMate.io - ESWY - Aman Sagar.mp3');
+    backgroundMusic.loop = true;
+
+    yeswyButton.addEventListener('click', () => {
+      localStorage.setItem('eswyTermsAccepted', 'true');
+      modal.style.display = 'none';
+      
+      // Start background music
+      backgroundMusic.play().catch(error => console.log('Audio playback failed:', error));
+      
+      // Start loading animation after modal is closed
+      const loadingAnimation = initializeLoadingAnimation();
+      loadingAnimation.start();
+    });
+
+    // Game initialization
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
+    const restartBtn = document.getElementById("restartBtn");
+    const spotifyBtn = document.getElementById("spotifyBtn");
+
+    // Add button event listeners
+    restartBtn.addEventListener("click", () => {
+      resetGame();
+      gameOverMessage.style.display = "none";
+    });
+
+    spotifyBtn.addEventListener("click", () => {
+      window.location.href = "https://open.spotify.com/track/1yazBO7fdWNDUcr3uuRbTr";
+    });
+
+    function resetGame() {
+      score = 0;
+      gameSpeed = 2.5;
+      obstacles = [];
+      gameOver = false;
+      dino.y = canvas.height - 60;
+      dino.jumping = false;
+      dino.velocity = 0;
+      dino.jumpCount = 0;
+      scoreElement.textContent = "Score: 0";
+      currentThemeIndex = 0;
+      currentTheme = themes[currentThemeIndex];
+      document.getElementById('gameContainer').style.filter = currentTheme.filter;
+      document.body.style.backgroundImage = `url('${currentTheme.backgrounds[0]}')`;
+    }
 
     // Responsive sizing
     let canvasWidth = Math.min(window.innerWidth * 0.95, 800);
@@ -124,7 +443,7 @@
       jumpForce: -12,
       currentSprite: frogSprite1,
       jumpCount: 0,
-      maxJumps: 2,
+      maxJumps: 4,
     };
 
     let obstacles = [];
@@ -134,6 +453,120 @@
     let gameOver = false;
     let gameSpeed = 2.5; // Reduced initial game speed
     const groundY = canvas.height - 10;
+    
+    // Theme system - changes every 400 points
+    const themes = [
+    {
+      name: "Dark Sepia",
+      skyColors: ['#2b1a0f', '#3e2617', '#5e3b1f', '#7c5430'],
+      sunColors: ['#e1b07e', '#c48a47', '#8b5a2b'],
+      sunGlowColor: 'rgba(225, 176, 126, 0.4)',
+      starColor: '#f4dab3',
+      cloudColor: '#bca18a',
+      groundColors: ['#5e3b1f', '#4c2d18', '#3a2111'],
+      grassColor: '#8c6239',
+      textColor: '#ffe1b3',
+      fontFamily: "'Press Start 2P', 'Courier New', monospace",
+      filter: 'sepia(0.7) brightness(0.9) contrast(1.1)',
+      backgrounds: ['background1.png', 'background2.png', 'background3.png', 'background4.png', 'background5.png', 'background6.png', 'background7.png']
+    },
+      {
+        name: "Janam 2",
+        skyColors: ['#faf3e3', '#f5e6cc', '#ecd9b9', '#e3cca6'],
+        sunColors: ['#ffd9a3', '#ffbf73', '#ffa64d'],
+        sunGlowColor: 'rgba(255, 191, 115, 0.5)',
+        starColor: '#b37840',
+        cloudColor: '#fff9f0',
+        groundColors: ['#d4b38c', '#bf9b75', '#a6835e'],
+        grassColor: '#c4a67a',
+        textColor: '#4d3319',
+        fontFamily: "'Press Start 2P', 'Source Code Pro', monospace",
+        filter: 'sepia(0.45) brightness(1.2) saturate(1.15) contrast(1.05)',
+        backgrounds: ['background1.png', 'background2.png', 'background3.png', 'background4.png', 'background5.png', 'background6.png', 'background7.png']
+      },
+      {
+          name: "Janam 3",
+          skyColors: ['#000000', '#111111', '#222222', '#333333'],
+          moonColors: ['#e0e0e0', '#cccccc', '#b3b3b3'],
+          moonGlowColor: 'rgba(224, 224, 224, 0.4)',
+          starColor: '#ffffff',
+          cloudColor: '#f0f0f0',
+          groundColors: ['#1a1a1a', '#2a2a2a', '#3a3a3a'],
+          grassColor: '#4d4d4d',
+          textColor: '#ffffff',
+          fontFamily: "'Times New Roman', 'Press Start 2P', serif",
+          filter: 'grayscale(1) contrast(1.3)',
+          backgrounds: ['background1.png', 'background2.png', 'background3.png', 'background4.png', 'background5.png', 'background6.png', 'background7.png'],
+          isMoon: true
+      },
+      {
+          name: "Janam 4",
+          skyColors: ['#f9f9f9', '#ededed', '#e0e0e0', '#d4d4d4'],
+          sunColors: ['#ffffff', '#f5f5f5', '#ebebeb'],
+          sunGlowColor: 'rgba(245, 245, 245, 0.4)',
+          starColor: '#b0b0b0',
+          cloudColor: '#ffffff',
+          groundColors: ['#c0c0c0', '#a8a8a8', '#8f8f8f'],
+          grassColor: '#b3b3b3',
+          textColor: '#333333',
+          fontFamily: "'Arial', 'Press Start 2P', sans-serif",
+          filter: 'grayscale(0.85) brightness(1.15)',
+          backgrounds: ['background1.png', 'background2.png', 'background3.png', 'background4.png', 'background5.png', 'background6.png', 'background7.png']
+      },
+      {
+          name: "Janam 5",
+          skyColors: ['#2c1810', '#3c1d12', '#4d2315', '#5e2817'],
+          sunColors: ['#ff6b3d', '#e65c33', '#cc4d29'],
+          sunGlowColor: 'rgba(255, 107, 61, 0.3)',
+          starColor: '#ffd700',
+          cloudColor: '#4a2416',
+          groundColors: ['#1e0f0a', '#2a1610', '#361c15'],
+          grassColor: '#4d2315',
+          textColor: '#ffd700',
+          fontFamily: "'Press Start 2P', monospace",
+          filter: 'brightness(0.9) contrast(1.2) saturate(1.1)',
+          backgrounds: ['background1.png', 'background2.png', 'background3.png', 'background4.png', 'background5.png', 'background6.png', 'background7.png']
+        },
+        {
+          name: "Janam 6",
+          skyColors: ['#d3cfff', '#beb3f5', '#a998e6', '#9380d4'],
+          sunColors: ['#fff3ff', '#ffd6ff', '#e5b3f0'],
+          sunGlowColor: 'rgba(255, 221, 255, 0.4)',
+          starColor: '#fceaff',
+          cloudColor: '#ffffff',
+          groundColors: ['#c0a3ff', '#a97ff0', '#8f5fdc'],
+          grassColor: '#dab3ff',
+          textColor: '#4b007d',
+          fontFamily: "'Orbitron', 'Press Start 2P', sans-serif",
+          filter: 'contrast(1.1) brightness(1.05) saturate(1.1)',
+          backgrounds: ['background1.png', 'background2.png', 'background3.png', 'background4.png', 'background5.png', 'background6.png', 'background7.png']
+        },
+        {
+          name: "Janam 7",
+          skyColors: ['#e6f3ff', '#d9edff', '#cce7ff', '#bfe1ff'],
+          sunColors: ['#ffeb3b', '#fdd835', '#fbc02d'],
+          sunGlowColor: 'rgba(255, 235, 59, 0.3)',
+          starColor: '#b0b0b0',
+          cloudColor: '#ffffff',
+          groundColors: ['#4caf50', '#43a047', '#388e3c'],
+          grassColor: '#66bb6a',
+          textColor: '#2c2c2c',
+          fontFamily: "'Inter', 'Arial', sans-serif",
+          filter: 'brightness(1.05) contrast(1.05)',
+          backgrounds: ['background1.png', 'background2.png', 'background3.png', 'background4.png', 'background5.png', 'background6.png', 'background7.png']
+        }
+    ];
+    
+    let currentThemeIndex = 0;
+    let currentTheme = themes[currentThemeIndex];
+    
+    // Apply initial theme
+    document.getElementById('gameContainer').style.filter = currentTheme.filter;
+    document.body.style.filter = 'none';
+    scoreElement.style.fontFamily = currentTheme.fontFamily;
+    scoreElement.style.color = currentTheme.textColor;
+    gameOverMessage.style.fontFamily = currentTheme.fontFamily;
+    gameOverMessage.style.color = currentTheme.textColor;
     
     // Obstacle generation variables
     let lastObstacleTime = Date.now();
@@ -237,7 +670,55 @@
       }
 
       score++;
-      scoreElement.textContent = `Score: ${Math.floor(score / 10)}`;
+      const displayScore = Math.floor(score / 10);
+      scoreElement.textContent = `Score: ${displayScore}`;
+      
+      // Change background at 300 points
+      // Update background based on score
+      const backgroundIndex = Math.floor(displayScore / 100) % 7;
+      const currentThemeBackgrounds = themes[currentThemeIndex].backgrounds;
+      document.body.style.backgroundImage = `url('${currentThemeBackgrounds[backgroundIndex]}')`;
+
+
+      // Check if we need to change theme (every 300 points)
+      const themeScore = Math.floor(displayScore / 30);
+      const newThemeIndex = themeScore % themes.length;
+      
+      if (newThemeIndex !== currentThemeIndex) {
+        currentThemeIndex = newThemeIndex;
+        currentTheme = themes[currentThemeIndex];
+        
+        // Apply new theme only to game container, not the score bar or body
+        const gameContainer = document.getElementById('gameContainer');
+        gameContainer.style.filter = currentTheme.filter;
+        // Remove any filter from body to ensure it doesn't affect other elements
+        document.body.style.filter = 'none';
+        // Keep score element styling consistent
+        gameOverMessage.style.fontFamily = currentTheme.fontFamily;
+        gameOverMessage.style.color = currentTheme.textColor;
+        
+        // Show theme announcement
+        const themeAnnouncement = document.getElementById("themeAnnouncement");
+        themeAnnouncement.textContent = `Theme: ${currentTheme.name}`;
+        themeAnnouncement.style.fontFamily = currentTheme.fontFamily;
+        themeAnnouncement.style.color = currentTheme.textColor;
+        themeAnnouncement.style.display = "block";
+        
+        // Fade in and out animation
+        setTimeout(() => {
+          themeAnnouncement.style.opacity = "1";
+          
+          setTimeout(() => {
+            themeAnnouncement.style.opacity = "0";
+            
+            setTimeout(() => {
+              themeAnnouncement.style.display = "none";
+            }, 500);
+          }, 2000);
+        }, 0);
+        
+        console.log(`Theme changed to: ${currentTheme.name}`);
+      }
       
       // Slower game speed increase rate
       gameSpeed += 0.0005;
@@ -246,18 +727,214 @@
     function draw() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      // Draw sky gradient directly on canvas
+      // Draw sky gradient using current theme
       const skyGradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
-      skyGradient.addColorStop(0, '#1a237e');    // Deep blue at top
-      skyGradient.addColorStop(0.3, '#3949ab');  // Medium blue
-      skyGradient.addColorStop(0.6, '#42a5f5');  // Light blue
-      skyGradient.addColorStop(1, '#81d4fa');    // Very light blue at horizon
+      skyGradient.addColorStop(0, currentTheme.skyColors[0]);    // Top color
+      skyGradient.addColorStop(0.3, currentTheme.skyColors[1]);  // Upper middle
+      skyGradient.addColorStop(0.6, currentTheme.skyColors[2]);  // Lower middle
+      skyGradient.addColorStop(1, currentTheme.skyColors[3]);    // Horizon
       
       ctx.fillStyle = skyGradient;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
       
-      // Draw stars (subtle)
-      ctx.fillStyle = '#FFFFFF';
+      // Draw background elements based on theme
+      if (currentThemeIndex === 0) {
+        // Draw mountains in first theme with parallax effect
+        const mountainOffset = (score * 0.3) % canvas.width;
+        
+        // Create multiple mountain ranges with different parallax speeds
+        // Background mountains (slowest)
+        ctx.fillStyle = '#2b1810';
+        for (let i = 0; i < 8; i++) {
+          const offset = (-mountainOffset * 0.5 + i * canvas.width/3) % (canvas.width * 2);
+          ctx.beginPath();
+          ctx.moveTo(offset - canvas.width/2, canvas.height);
+          ctx.quadraticCurveTo(
+            offset + 200, canvas.height - 180 - Math.sin(i) * 10,
+            offset + canvas.width/2, canvas.height
+          );
+          ctx.fill();
+        }
+        
+        // Middle mountains
+        ctx.fillStyle = '#3d2915';
+        for (let i = 0; i < 6; i++) {
+          const offset = (-mountainOffset * 0.7 + i * canvas.width/4) % (canvas.width * 2);
+          ctx.beginPath();
+          ctx.moveTo(offset - canvas.width/2, canvas.height);
+          ctx.quadraticCurveTo(
+            offset + 150, canvas.height - 190 - Math.sin(i * 1.5) * 20,
+            offset + canvas.width/2, canvas.height
+          );
+          ctx.fill();
+        }
+        
+        // Foreground mountains (fastest)
+        ctx.fillStyle = '#4a3b2c';
+        for (let i = 0; i < 7; i++) {
+          const offset = (-mountainOffset * 0.9 + i * canvas.width/5) % (canvas.width * 2);
+          ctx.beginPath();
+          ctx.moveTo(offset - canvas.width/2, canvas.height);
+          ctx.quadraticCurveTo(
+            offset + 100, canvas.height - 140 - Math.sin(i * 2) * 15,
+            offset + canvas.width/2, canvas.height
+          );
+          ctx.fill();
+        }
+      } else if (currentThemeIndex === 5) { // Y2K Theme
+        const buildingOffset = (score * 0.5) % canvas.width;
+        
+        // Draw neon grid background
+        ctx.strokeStyle = 'rgba(255, 0, 255, 0.2)';
+        ctx.lineWidth = 1;
+        for (let i = 0; i < canvas.width; i += 20) {
+          const offset = (i - buildingOffset) % canvas.width;
+          ctx.beginPath();
+          ctx.moveTo(offset, 0);
+          ctx.lineTo(offset, canvas.height);
+          ctx.stroke();
+        }
+        
+        // Draw Y2K buildings
+        for (let i = 0; i < 6; i++) {
+          const buildingX = ((i * canvas.width/3 - buildingOffset) % (canvas.width * 2)) - canvas.width/2;
+          const height = 100 + Math.sin(i * 1.5) * 30;
+          
+          // Main building body
+          ctx.fillStyle = `rgba(${180 + i * 20}, ${100 + i * 20}, ${255}, 0.8)`;
+          ctx.fillRect(buildingX, canvas.height - height, 80, height);
+          
+          // Neon outlines
+          ctx.strokeStyle = '#ff00ff';
+          ctx.lineWidth = 2;
+          ctx.strokeRect(buildingX, canvas.height - height, 80, height);
+          
+          // Windows
+          for (let y = 10; y < height - 10; y += 20) {
+            for (let x = 10; x < 70; x += 20) {
+              ctx.fillStyle = `rgba(255, 255, ${200 + Math.sin(Date.now() * 0.001 + i) * 55}, 0.9)`;
+              ctx.fillRect(buildingX + x, canvas.height - height + y, 10, 10);
+            }
+          }
+        }
+      } else if (currentThemeIndex === 6) { // Modern Minimal Theme
+        const buildingOffset = (score * 0.4) % canvas.width;
+        
+        // Draw modern buildings
+        for (let i = 0; i < 5; i++) {
+          const buildingX = ((i * canvas.width/2.5 - buildingOffset) % (canvas.width * 2)) - canvas.width/2;
+          const height = 120 + Math.cos(i * 0.8) * 40;
+          
+          // Main building shape
+          ctx.fillStyle = `rgba(${220 + i * 5}, ${220 + i * 5}, ${220 + i * 5}, 0.9)`;
+          ctx.beginPath();
+          ctx.moveTo(buildingX, canvas.height);
+          ctx.lineTo(buildingX, canvas.height - height);
+          ctx.lineTo(buildingX + 100, canvas.height - height - 20);
+          ctx.lineTo(buildingX + 100, canvas.height);
+          ctx.fill();
+          
+          // Geometric details
+          ctx.fillStyle = `rgba(${200 + i * 10}, ${200 + i * 10}, ${200 + i * 10}, 0.7)`;
+          for (let j = 20; j < height; j += 30) {
+            ctx.fillRect(buildingX + 10, canvas.height - j, 80, 5);
+          }
+          
+          // Glass panels
+          ctx.fillStyle = 'rgba(240, 240, 240, 0.3)';
+          for (let y = 10; y < height - 30; y += 40) {
+            ctx.fillRect(buildingX + 20, canvas.height - height + y, 60, 25);
+          }
+        }
+      } else if (currentThemeIndex === 1) {
+        // Draw mountains and detailed trees in second theme with parallax
+        const mountainOffset2 = (score * 0.3) % canvas.width;
+        
+        // Mountains with smooth curves
+        ctx.fillStyle = '#4a3b2c';
+        ctx.beginPath();
+        ctx.moveTo(-mountainOffset2, canvas.height);
+        ctx.quadraticCurveTo(150 - mountainOffset2, canvas.height - 170, 300 - mountainOffset2, canvas.height - 90);
+        ctx.quadraticCurveTo(450 - mountainOffset2, canvas.height - 140, 600 - mountainOffset2, canvas.height - 80);
+        ctx.quadraticCurveTo(750 - mountainOffset2, canvas.height - 130, 900 - mountainOffset2, canvas.height);
+        ctx.lineTo(canvas.width, canvas.height);
+        ctx.fill();
+        
+        // Detailed Trees
+        for(let x = 50; x < canvas.width + 120; x += 120) {
+          const treeX = x - (score * 0.8) % 120;
+          
+          // Tree trunk with detail
+          ctx.fillStyle = '#3d2b1f';
+          ctx.fillRect(treeX - 5, canvas.height - 120, 10, 30);
+          
+          // Detailed tree top
+          ctx.fillStyle = '#5e3b1e';
+          ctx.beginPath();
+          ctx.moveTo(treeX, canvas.height - 120);
+          ctx.lineTo(treeX - 20, canvas.height - 90);
+          ctx.lineTo(treeX, canvas.height - 110);
+          ctx.lineTo(treeX - 10, canvas.height - 80);
+          ctx.lineTo(treeX, canvas.height - 100);
+          ctx.lineTo(treeX + 10, canvas.height - 80);
+          ctx.lineTo(treeX, canvas.height - 110);
+          ctx.lineTo(treeX + 20, canvas.height - 90);
+          ctx.closePath();
+          ctx.fill();
+          
+          // Add small nuances (leaves/branches)
+          ctx.fillStyle = '#4d2e17';
+          for(let i = 0; i < 5; i++) {
+            const leafX = treeX + Math.cos(Date.now() * 0.001 + i) * 15;
+            const leafY = canvas.height - 110 + Math.sin(Date.now() * 0.001 + i) * 5;
+            ctx.beginPath();
+            ctx.arc(leafX, leafY, 2, 0, Math.PI * 2);
+            ctx.fill();
+          }
+        }
+      } else if (currentThemeIndex === 2) {
+        // Draw tall mountains in third theme
+        ctx.fillStyle = '#2b1810';
+        ctx.beginPath();
+        ctx.moveTo(0, canvas.height - 120);
+        ctx.lineTo(200, canvas.height - 220);
+        ctx.lineTo(400, canvas.height - 150);
+        ctx.lineTo(600, canvas.height - 200);
+        ctx.lineTo(canvas.width, canvas.height - 180);
+        ctx.lineTo(canvas.width, canvas.height);
+        ctx.lineTo(0, canvas.height);
+        ctx.fill();
+      } else if (currentThemeIndex === 3) {
+        // Draw birds and additional scenery in fourth theme
+        // Birds
+        ctx.fillStyle = '#000000';
+        for(let i = 0; i < 5; i++) {
+          const x = (canvas.width / 6) * i + 100;
+          const y = 50 + Math.sin(Date.now() / 1000 + i) * 10;
+          
+          ctx.beginPath();
+          ctx.moveTo(x, y);
+          ctx.lineTo(x + 10, y - 5);
+          ctx.lineTo(x + 20, y);
+          ctx.stroke();
+        }
+        
+        // Additional scenery (distant mountains)
+        ctx.fillStyle = '#1a1a1a';
+        ctx.beginPath();
+        ctx.moveTo(0, canvas.height - 60);
+        ctx.lineTo(150, canvas.height - 120);
+        ctx.lineTo(300, canvas.height - 80);
+        ctx.lineTo(450, canvas.height - 140);
+        ctx.lineTo(600, canvas.height - 90);
+        ctx.lineTo(canvas.width, canvas.height - 110);
+        ctx.lineTo(canvas.width, canvas.height);
+        ctx.lineTo(0, canvas.height);
+        ctx.fill();
+      }
+      
+      // Draw stars with theme color
+      ctx.fillStyle = currentTheme.starColor;
       stars.forEach(star => {
         ctx.globalAlpha = star.twinkle;
         ctx.beginPath();
@@ -266,43 +943,86 @@
       });
       ctx.globalAlpha = 1;
       
-      // Draw sun with gradient and glow
-      const sunGradient = ctx.createRadialGradient(
-        sun.x, sun.y, 0,
-        sun.x, sun.y, sun.radius
-      );
-      sunGradient.addColorStop(0, '#FFFF99');
-      sunGradient.addColorStop(0.8, '#FFCC33');
-      sunGradient.addColorStop(1, '#FF9900');
-      
-      ctx.fillStyle = sunGradient;
-      ctx.beginPath();
-      ctx.arc(sun.x, sun.y, sun.radius, 0, Math.PI * 2);
-      ctx.fill();
-      
-      // Sun glow
-      ctx.save();
-      ctx.globalAlpha = 0.2;
-      const glowGradient = ctx.createRadialGradient(
-        sun.x, sun.y, sun.radius,
-        sun.x, sun.y, sun.radius + sun.glow
-      );
-      glowGradient.addColorStop(0, '#FFCC33');
-      glowGradient.addColorStop(1, 'rgba(255, 204, 51, 0)');
-      
-      ctx.fillStyle = glowGradient;
-      ctx.beginPath();
-      ctx.arc(sun.x, sun.y, sun.radius + sun.glow, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.restore();
+      // Draw sun/moon with themed gradient and glow
+      if (currentTheme.isMoon) {
+        // Draw moon with crater details
+        const moonGradient = ctx.createRadialGradient(
+          sun.x, sun.y, 0,
+          sun.x, sun.y, sun.radius
+        );
+        moonGradient.addColorStop(0, currentTheme.moonColors[0]);
+        moonGradient.addColorStop(0.8, currentTheme.moonColors[1]);
+        moonGradient.addColorStop(1, currentTheme.moonColors[2]);
+        
+        ctx.fillStyle = moonGradient;
+        ctx.beginPath();
+        ctx.arc(sun.x, sun.y, sun.radius, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Moon glow
+        ctx.save();
+        ctx.globalAlpha = 0.2;
+        const moonGlowGradient = ctx.createRadialGradient(
+          sun.x, sun.y, sun.radius,
+          sun.x, sun.y, sun.radius + sun.glow
+        );
+        moonGlowGradient.addColorStop(0, currentTheme.moonColors[1]);
+        moonGlowGradient.addColorStop(1, currentTheme.moonGlowColor);
+        
+        ctx.fillStyle = moonGlowGradient;
+        ctx.beginPath();
+        ctx.arc(sun.x, sun.y, sun.radius + sun.glow, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Add moon craters
+        ctx.globalAlpha = 0.3;
+        ctx.fillStyle = '#d3d3d3';
+        ctx.beginPath();
+        ctx.arc(sun.x - 10, sun.y - 5, 8, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(sun.x + 8, sun.y + 10, 6, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      } else {
+        // Draw sun with themed gradient and glow
+        const sunGradient = ctx.createRadialGradient(
+          sun.x, sun.y, 0,
+          sun.x, sun.y, sun.radius
+        );
+        sunGradient.addColorStop(0, currentTheme.sunColors[0]);
+        sunGradient.addColorStop(0.8, currentTheme.sunColors[1]);
+        sunGradient.addColorStop(1, currentTheme.sunColors[2]);
+        
+        ctx.fillStyle = sunGradient;
+        ctx.beginPath();
+        ctx.arc(sun.x, sun.y, sun.radius, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Sun glow with theme color
+        ctx.save();
+        ctx.globalAlpha = 0.2;
+        const glowGradient = ctx.createRadialGradient(
+          sun.x, sun.y, sun.radius,
+          sun.x, sun.y, sun.radius + sun.glow
+        );
+        glowGradient.addColorStop(0, currentTheme.sunColors[1]);
+        glowGradient.addColorStop(1, currentTheme.sunGlowColor);
+        
+        ctx.fillStyle = glowGradient;
+        ctx.beginPath();
+        ctx.arc(sun.x, sun.y, sun.radius + sun.glow, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
 
-      // Draw enhanced clouds
+      // Draw themed clouds
       clouds.forEach(cloud => {
         ctx.save();
         ctx.globalAlpha = cloud.opacity;
         
         // Multiple connected circles for more natural cloud shapes
-        ctx.fillStyle = '#FFFFFF';
+        ctx.fillStyle = currentTheme.cloudColor;
         ctx.beginPath();
         
         const centerX = cloud.x + cloud.width / 2;
@@ -325,18 +1045,18 @@
         ctx.restore();
       });
 
-      // Enhanced ground with multiple layers
+      // Enhanced ground with themed colors
       // Base ground
       const groundGradient = ctx.createLinearGradient(0, groundY - 20, 0, canvas.height);
-      groundGradient.addColorStop(0, '#4CAF50');  // Light green at top
-      groundGradient.addColorStop(0.5, '#388E3C'); // Medium green
-      groundGradient.addColorStop(1, '#2E7D32');   // Dark green at bottom
+      groundGradient.addColorStop(0, currentTheme.groundColors[0]);  // Light color at top
+      groundGradient.addColorStop(0.5, currentTheme.groundColors[1]); // Medium color
+      groundGradient.addColorStop(1, currentTheme.groundColors[2]);   // Dark color at bottom
       
       ctx.fillStyle = groundGradient;
       ctx.fillRect(0, groundY - 5, canvas.width, canvas.height - groundY + 5);
       
       // Add texture pattern to ground
-      ctx.fillStyle = 'rgba(48, 100, 48, 0.5)';
+      ctx.fillStyle = currentTheme.groundColors[1] + '80'; // 50% opacity
       for(let i = 0; i < canvas.width; i += 15) {
         for(let j = groundY; j < canvas.height; j += 10) {
           if (Math.random() > 0.7) {
@@ -345,8 +1065,8 @@
         }
       }
       
-      // Draw detailed grass tufts
-      ctx.fillStyle = '#4CAF50';
+      // Draw detailed grass tufts with theme color
+      ctx.fillStyle = currentTheme.grassColor;
       grassTufts.forEach(tuft => {
         // Grass blades
         ctx.beginPath();
@@ -380,29 +1100,6 @@
         ctx.drawImage(sprite, ob.x, ob.y, ob.width, ob.height);
       });
       
-      // Debug: Visualize hitboxes (uncomment for debugging)
-      /*
-      ctx.strokeStyle = 'red';
-      ctx.lineWidth = 2;
-      
-      // Dino hitbox
-      const dinoHitboxReduction = 0.2;
-      const dinoHitboxWidth = dino.width * (1 - dinoHitboxReduction);
-      const dinoHitboxHeight = dino.height * (1 - dinoHitboxReduction);
-      const dinoHitboxX = dino.x + (dino.width - dinoHitboxWidth) / 2;
-      const dinoHitboxY = dino.y + (dino.height - dinoHitboxHeight) / 2;
-      ctx.strokeRect(dinoHitboxX, dinoHitboxY, dinoHitboxWidth, dinoHitboxHeight);
-      
-      // Obstacle hitboxes
-      obstacles.forEach(ob => {
-        const obHitboxReduction = 0.2;
-        const obHitboxWidth = ob.width * (1 - obHitboxReduction);
-        const obHitboxHeight = ob.height * (1 - obHitboxReduction);
-        const obHitboxX = ob.x + (ob.width - obHitboxWidth) / 2;
-        const obHitboxY = ob.y + (ob.height - obHitboxHeight) / 2;
-        ctx.strokeRect(obHitboxX, obHitboxY, obHitboxWidth, obHitboxHeight);
-      });
-      */
     }
 
     function loop() {
@@ -413,9 +1110,7 @@
 
     // Keyboard & touch controls
     function jump() {
-      if (gameOver) {
-        location.reload();
-      } else if (dino.jumpCount < dino.maxJumps) {
+      if (!gameOver && (dino.jumpCount < dino.maxJumps)) {
         dino.velocity = dino.jumpForce;
         dino.jumping = true;
         dino.jumpCount++;
@@ -423,14 +1118,73 @@
     }
 
     window.addEventListener("keydown", (e) => {
-      if (e.code === "Space") jump();
+      if (e.code === "Space") {
+        if (gameOver) {
+          resetGame();
+          gameOverMessage.style.display = "none";
+          return;
+        }
+        jump();
+      } else if (e.code === "KeyR") {
+        resetGame();
+        gameOverMessage.style.display = "none";
+      }
     });
 
     window.addEventListener("touchstart", () => {
       jump();
     });
 
-    loop();
+    // Initialize and start the loading animation
+    const loadingAnimation = initializeLoadingAnimation();
+    
+    // Apply initial theme to loading animation
+    const initialLoader = document.getElementById("initial-loader");
+    initialLoader.style.background = `rgba(${currentTheme.groundColors[0].replace(/[^0-9,]/g, '')}, 0.8)`;
+    
+    // Start the animation
+    loadingAnimation.start();
+    
+    // Wait for assets to load before starting the game
+    // Proper window load event
+window.addEventListener('load', () => {
+  const yeswyBtn = document.getElementById('yeswyButton');
+  const modal = document.getElementById('termsModal');
+
+  // Attach event listener safely
+  yeswyBtn.addEventListener('click', function () {
+    modal.style.display = 'none';
+    startGame(); // Start the game only after accepting terms
+  });
+
+  // Optional: prevent game start if user tries to jump before accepting
+  window.addEventListener("keydown", (e) => {
+    if (e.code === "Space" && modal.style.display !== 'none') {
+      e.preventDefault();
+    } else if (e.code === "Space") {
+      jump();
+    }
+  });
+
+  window.addEventListener("touchstart", () => {
+    if (modal.style.display === 'none') jump();
+  });
+
+  // Initialize loading animation and theme
+  const loadingAnimation = initializeLoadingAnimation();
+  const initialLoader = document.getElementById("initial-loader");
+  initialLoader.style.background = `rgba(${currentTheme.groundColors[0].replace(/[^0-9,]/g, '')}, 0.8)`;
+  loadingAnimation.start();
+});
+
+// Game start is now fully controlled by modal button
+function startGame() {
+  setTimeout(() => {
+    loop(); // Start game loop
+    console.log('Game started');
+  }, 1500);
+}
+
   </script>
 </body>
 </html>
