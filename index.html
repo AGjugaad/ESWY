@@ -30,6 +30,8 @@
       margin: 0;
       padding: 0;
       height: 100%;
+      min-height: 100vh;
+      overflow-x: hidden;
       background-image: url('background1.png');
       background-size: cover;
       background-position: center;
@@ -49,6 +51,11 @@
       background: transparent;
       border-radius: 8px;
       transition: filter 1s ease;
+      position: relative;
+      z-index: 1;
+      pointer-events: auto;
+      visibility: visible !important;
+      opacity: 1 !important;
     }
     
     /* Loading animation styles */
@@ -295,34 +302,34 @@
   
   <!-- Include loading animation script -->
   <script>
-    // Modal and loading animation logic
+    // Remove local storage logic
     const modal = document.getElementById('termsModal');
     const yeswyButton = document.getElementById('yeswyButton');
-    const hasAcceptedTerms = localStorage.getItem('eswyTermsAccepted');
-
-    // Hide modal if terms were previously accepted
-    if (hasAcceptedTerms) {
-      modal.style.display = 'none';
-    }
-
+    
+    // Ensure modal is displayed only once per session
+    modal.style.display = 'flex';
+    
+    // Initialize audio element
+    const backgroundMusic = new Audio('SpotiMate.io - ESWY - Aman Sagar.mp3');
+    
     function initializeLoadingAnimation() {
       const loadingContainer = document.getElementById('initial-loader');
       const diamonds = loadingContainer.querySelectorAll('.diamond');
-
+    
       let currentIndex = 0;
       let animationInterval;
       let cycles = 0;
       const maxCycles = 1;
-
+    
       loadingContainer.style.filter = 'none';
-
+    
       function activateDiamond() {
         diamonds.forEach(diamond => diamond.classList.remove('active'));
         
         if (currentIndex >= diamonds.length) {
           currentIndex = 0;
           cycles++;
-
+    
           if (cycles >= maxCycles) {
             clearInterval(animationInterval);
             setTimeout(() => {
@@ -335,7 +342,7 @@
         diamonds[currentIndex].classList.add('active');
         currentIndex++;
       }
-
+    
       return {
         start: () => {
           loadingContainer.style.display = 'grid';
@@ -343,14 +350,9 @@
         }
       };
     }
-
-    // Initialize game only after accepting terms
-    // Create audio element
-    const backgroundMusic = new Audio('SpotiMate.io - ESWY - Aman Sagar.mp3');
-    backgroundMusic.loop = true;
-
+    
+    // Start loading animation and game
     yeswyButton.addEventListener('click', () => {
-      localStorage.setItem('eswyTermsAccepted', 'true');
       modal.style.display = 'none';
       
       // Start background music
@@ -360,23 +362,23 @@
       const loadingAnimation = initializeLoadingAnimation();
       loadingAnimation.start();
     });
-
-    // Game initialization
+    
+    // Ensure game container remains visible and functional
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
     const restartBtn = document.getElementById("restartBtn");
     const spotifyBtn = document.getElementById("spotifyBtn");
-
+    
     // Add button event listeners
     restartBtn.addEventListener("click", () => {
       resetGame();
       gameOverMessage.style.display = "none";
     });
-
+    
     spotifyBtn.addEventListener("click", () => {
       window.location.href = "https://open.spotify.com/track/1yazBO7fdWNDUcr3uuRbTr";
     });
-
+    
     function resetGame() {
       score = 0;
       gameSpeed = 2.5;
@@ -392,28 +394,28 @@
       document.getElementById('gameContainer').style.filter = currentTheme.filter;
       document.body.style.backgroundImage = `url('${currentTheme.backgrounds[0]}')`;
     }
-
+    
     // Responsive sizing
     let canvasWidth = Math.min(window.innerWidth * 0.95, 800);
     let canvasHeight = Math.min(window.innerHeight * 0.6, 300);
     canvas.width = canvasWidth;
     canvas.height = canvasHeight;
-
+    
     const scoreElement = document.getElementById("score");
     const gameOverMessage = document.getElementById("gameOverMessage");
-
+    
     const frogSprite1 = new Image();
     frogSprite1.src = "frogbaba1.png";
     const frogSprite2 = new Image();
     frogSprite2.src = "frogbaba2.png";
     const frogJumpSprite = new Image();
     frogJumpSprite.src = "frogbaba3.png";
-
+    
     const tallLotus = new Image();
     tallLotus.src = "lotus1.png";
     const shortLotus = new Image();
     shortLotus.src = "lotus2.png";
-
+    
     // Sky elements
     const sun = {
       x: canvasWidth - 70,
@@ -431,7 +433,7 @@
         twinkle: Math.random() * 0.5 + 0.5
       });
     }
-
+    
     const dino = {
       x: 50,
       y: canvas.height - 60,
@@ -445,7 +447,7 @@
       jumpCount: 0,
       maxJumps: 4,
     };
-
+    
     let obstacles = [];
     let clouds = [];
     let score = 0;
@@ -472,17 +474,17 @@
     },
       {
         name: "Janam 2",
-        skyColors: ['#faf3e3', '#f5e6cc', '#ecd9b9', '#e3cca6'],
-        sunColors: ['#ffd9a3', '#ffbf73', '#ffa64d'],
-        sunGlowColor: 'rgba(255, 191, 115, 0.5)',
-        starColor: '#b37840',
-        cloudColor: '#fff9f0',
-        groundColors: ['#d4b38c', '#bf9b75', '#a6835e'],
-        grassColor: '#c4a67a',
-        textColor: '#4d3319',
+        skyColors: ['#fff5e6', '#ffecd9', '#ffe4cc', '#ffdbba'],
+        sunColors: ['#ffcc80', '#ffb74d', '#ffa726'],
+        sunGlowColor: 'rgba(255, 167, 38, 0.4)',
+        starColor: '#d4a257',
+        cloudColor: '#fff9f2',
+        groundColors: ['#e6c9a3', '#d4b38c', '#c19b76'],
+        grassColor: '#d4b892',
+        textColor: '#5c4023',
         fontFamily: "'Press Start 2P', 'Source Code Pro', monospace",
-        filter: 'sepia(0.45) brightness(1.2) saturate(1.15) contrast(1.05)',
-        backgrounds: ['background1.png', 'background2.png', 'background3.png', 'background4.png', 'background5.png', 'background6.png', 'background7.png']
+        filter: 'sepia(0.35) brightness(1.15) saturate(1.1) contrast(1.05)',
+        backgrounds: ['background1.png']
       },
       {
           name: "Janam 3",
@@ -561,12 +563,9 @@
     let currentTheme = themes[currentThemeIndex];
     
     // Apply initial theme
-    document.getElementById('gameContainer').style.filter = currentTheme.filter;
-    document.body.style.filter = 'none';
     scoreElement.style.fontFamily = currentTheme.fontFamily;
     scoreElement.style.color = currentTheme.textColor;
     gameOverMessage.style.fontFamily = currentTheme.fontFamily;
-    gameOverMessage.style.color = currentTheme.textColor;
     
     // Obstacle generation variables
     let lastObstacleTime = Date.now();
