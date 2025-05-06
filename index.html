@@ -11,13 +11,13 @@
     <div class="modal-content">
       <p>The audio ahead contains a jumble of highly potent cosmic frequencies. Listening to it may cause:</p>
 
-      <div style="margin-left: 1em; line-height: 1.6;">
-        <div>— Unregulated flashbacks of past lives</div>
-        <div>— An unshakable thought that you don’t belong here</div>
-        <div>— Fear of dying in bizarre ways</div>
-        <div>— A deep yearning that cannot be fixed</div>
-        <div>— A clear view of the Truth</div>
-        <div>— A fixing of the soul</div>
+      <div style="margin: 0 auto; line-height: 1.6; max-width: 100%;">
+        <div style="font-size: clamp(10px, 2.5vw, 14px); margin: 8px 0;">— Unregulated flashbacks of past lives</div>
+        <div style="font-size: clamp(10px, 2.5vw, 14px); margin: 8px 0;">— An unshakable thought that you don't belong here</div>
+        <div style="font-size: clamp(10px, 2.5vw, 14px); margin: 8px 0;">— Fear of dying in bizarre ways</div>
+        <div style="font-size: clamp(10px, 2.5vw, 14px); margin: 8px 0;">— A deep yearning that cannot be fixed</div>
+        <div style="font-size: clamp(10px, 2.5vw, 14px); margin: 8px 0;">— A clear view of the Truth</div>
+        <div style="font-size: clamp(10px, 2.5vw, 14px); margin: 8px 0;">— A fixing of the soul</div>
       </div>
       
       <p>If you think you can handle said side effects, <strong>ESWY</strong>, the song awaits you.<br>
@@ -122,18 +122,22 @@
       z-index: 1001;
       opacity: 1;
       transition: opacity 0.3s ease;
+      padding: 20px;
+      box-sizing: border-box;
     }
     .modal-content {
       background: linear-gradient(145deg, #2a2a2a, #1a1a1a);
-      padding: 30px;
+      padding: clamp(15px, 4vw, 30px);
       border-radius: 15px;
       text-align: center;
       color: #fff;
       font-family: 'Press Start 2P', cursive;
       box-shadow: 0 0 20px rgba(0, 0, 0, 0.5),
                  inset 0 0 15px rgba(255, 255, 255, 0.1);
-      max-width: 600px;
-      width: 90%;
+      max-width: min(600px, 95%);
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
       border: 1px solid rgba(255, 255, 255, 0.1);
       animation: modalAppear 0.5s ease-out;
     }
@@ -149,14 +153,15 @@
     }
     .modal-content p {
       line-height: 1.8;
-      margin: 0 0 20px 0;
+      margin: 0 0 clamp(10px, 3vw, 20px) 0;
       color: #fff;
       text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+      font-size: clamp(12px, 3vw, 16px);
     }
     #yeswyButton {
-      margin-top: 25px;
-      padding: 15px 30px;
-      font-size: 18px;
+      margin-top: clamp(15px, 4vw, 25px);
+      padding: clamp(10px, 3vw, 15px) clamp(20px, 5vw, 30px);
+      font-size: clamp(14px, 3vw, 18px);
       cursor: pointer;
       background: linear-gradient(45deg, #ff6b6b, #ff8e8e);
       border: none;
@@ -166,6 +171,7 @@
       text-transform: uppercase;
       transition: all 0.3s ease;
       box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
+      width: fit-content;
     }
     #yeswyButton:hover {
       transform: translateY(-2px);
